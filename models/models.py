@@ -16,15 +16,22 @@ class Question(BaseModel, ABC):
     text: str
 
     @abstractmethod
-    def get_answer_text(self):
+    def get_answer_text(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_answer_details(self) -> dict[str, ...]:
         pass
 
 
 class TextBoxQuestion(Question):
     textbox_content: str
 
-    def get_answer_text(self):
+    def get_answer_text(self) -> str:
         return self.textbox_content
+
+    def get_answer_details(self) -> dict[str, ...]:
+        return {"type": "textbox", "value": self.textbox_content}
 
 
 class QuestionOption(BaseModel):
@@ -40,6 +47,9 @@ class MultipleChoiceQuestion(Question):
 
     def get_answer_text(self):
         return "\n".join(opt.text for opt in self.options if opt.is_chosen)
+
+    def get_answer_details(self) -> dict[str, ...]:
+        return {"type": "multiple_choice", "value": [i for i, opt in enumerate(self.options) if opt.is_chosen]}
 
 
 class Poll(BaseModel):
