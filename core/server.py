@@ -1,4 +1,4 @@
-from game import Game
+from core.game import Game
 from models.models import Poll
 
 
