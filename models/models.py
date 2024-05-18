@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import pydantic.dataclasses
 from pydantic import BaseModel
 import json
 
