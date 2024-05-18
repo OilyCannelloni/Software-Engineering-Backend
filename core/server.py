@@ -7,9 +7,16 @@ class Server:
         self.game = Game()
 
     @staticmethod
-    def save_poll(poll: Poll, filename: str):
+    def save_poll(poll: Poll, filename: str) -> bool:
         with open(filename, "w") as file:
             file.write(poll.to_json())
+            return True
+
+    @staticmethod
+    def load_poll(filename: str) -> Poll:
+        with open(filename, "r") as file:
+            content = file.read()
+            return Poll.from_json(content)
 
 
 server = Server()

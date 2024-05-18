@@ -29,3 +29,8 @@ def register(user: User):
 @router.post("/poll/{name}/save")
 def save_poll(name: str, poll: Poll):
     server.save_poll(poll, name)
+
+
+@router.get("/poll/{name}/load")
+def load_poll(name: str) -> Poll:
+    return server.load_poll(name)
