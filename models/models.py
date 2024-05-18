@@ -1,4 +1,6 @@
+from __future__ import annotations
 from pydantic import BaseModel
+import json
 
 
 class User(BaseModel):
@@ -38,3 +40,10 @@ class Poll(BaseModel):
     title: str
     description: str
     questions: list[Question]
+
+    def to_json(self):
+        return json.dumps(self, default=lambda obj: obj.__dict__, indent=4)
+
+    @classmethod
+    def from_json(cls, json_content) -> Poll:
+        return Poll(**json.loads(json_content))
