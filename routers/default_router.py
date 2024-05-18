@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
+from starlette.requests import Request
+
 from models.models import User
 from core.server import game
 
@@ -6,8 +8,12 @@ router = APIRouter()
 
 
 @router.get("/")
-def read_root():
-    return {"Hello": "World"}
+def root(request: Request):
+    addr = f"{request.client.host}:{request.client.port}"
+    return {
+        "Hello": "World",
+        "addr": addr
+    }
 
 
 @router.get("/register/")
