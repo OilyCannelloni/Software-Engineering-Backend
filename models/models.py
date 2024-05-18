@@ -1,14 +1,17 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
 
-@dataclass
 class User(BaseModel):
     name: str
 
+    def __hash__(self):
+        return self.name.__hash__()
 
-@dataclass
+    def __eq__(self, other):
+        return self.name == other.name
+
+
 class Question(BaseModel, ABC):
     text: str
 
@@ -17,7 +20,6 @@ class Question(BaseModel, ABC):
         pass
 
 
-@dataclass
 class TextBoxQuestion(Question):
     textbox_content: str
 
@@ -25,13 +27,11 @@ class TextBoxQuestion(Question):
         return self.textbox_content
 
 
-@dataclass
 class QuestionOption(BaseModel):
     text: str
     is_chosen: bool = False
 
 
-@dataclass
 class MultipleChoiceQuestion(Question):
     """
     For now, use this to model single choice questions as well.
@@ -42,7 +42,6 @@ class MultipleChoiceQuestion(Question):
         return "\n".join(opt.text for opt in self.options if opt.is_chosen)
 
 
-@dataclass
 class Poll(BaseModel):
     title: str
     description: str
