@@ -5,13 +5,15 @@ from core.server import server
 
 FILE_PATH = "test-poll-load-save-1"
 
+
 class TestPollLoadSave(unittest.TestCase):
     def test_poll_load_save(self):
-        q1 = Question(text="Question 1", options=[
+        q1 = Question(text="Question 1", type=QuestionType.MULTIPLE_CHOICE, options=[
             QuestionOption(text="opt 1"),
-            QuestionOption(text="opt 2", is_chosen=True)
+            QuestionOption(text="opt 2", is_optional=True)
         ])
-        q2 = Question(text="Question 2", textbox=QuestionTextbox(is_visible=True, initial_value="init_val"))
+        q2 = Question(text="Question 2", type=QuestionType.TEXTBOX,
+                      textbox=QuestionTextbox(initial_value="init_val"))
         poll = Poll(
             title="Test Poll",
             description="Testing JSON serialization",
@@ -27,6 +29,7 @@ class TestPollLoadSave(unittest.TestCase):
         self.assertEqual(poll.title, "Test Poll")
         self.assertEqual(poll.description, "Testing JSON serialization")
         self.assertEqual(poll.questions[0].textbox.is_visible, False)
+        self.assertEqual(poll.questions[0].type, QuestionType.MULTIPLE_CHOICE)
         self.assertEqual(len(poll.questions), 2)
         self.assertEqual(poll.questions[0].options[0].text, "opt 1")
         self.assertEqual(len(poll.questions[0].options), 2)
