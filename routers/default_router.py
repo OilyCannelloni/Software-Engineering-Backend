@@ -16,11 +16,11 @@ def root(request: Request):
     }
 
 
-@router.get("/register/")
+@router.post("/register/")
 def register(user: User):
     if game.register_user(user):
         return status.HTTP_200_OK
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_409_CONFLICT,
         detail="Username already taken"
     )
