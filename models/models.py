@@ -1,5 +1,5 @@
 from __future__ import annotations
-from enum import Enum
+from enum import IntEnum
 from pydantic import BaseModel
 import json
 
@@ -14,14 +14,14 @@ class User(BaseModel):
         return self.name == other.name
 
 
-class QuestionType(Enum):
+class QuestionType(IntEnum):
     TEXTBOX = 1
     MULTIPLE_CHOICE = 2
     SINGLE_CHOICE = 3
 
 
 class QuestionOption(BaseModel):
-    text: str
+    text: str = ""
     is_selected: bool = False
 
 
@@ -33,10 +33,10 @@ class QuestionTextbox(BaseModel):
 
 class Question(BaseModel):
     type: QuestionType
-    text: str
+    text: str = ""
     textbox: QuestionTextbox = QuestionTextbox()
     options: list[QuestionOption] = []
-    is_optional: bool
+    is_optional: bool = False
 
     def get_answer_text(self) -> str:
         if self.type == QuestionType.MULTIPLE_CHOICE or self.type == QuestionType.SINGLE_CHOICE:
