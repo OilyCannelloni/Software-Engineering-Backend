@@ -3,9 +3,7 @@ from routers import default_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
-origins = [
-    "http://localhost:4200"     # default URL for locally hosted Angular app
-]
+origins = ["http://localhost:4200"]  # default URL for locally hosted Angular app
 
 app = FastAPI()
 
@@ -24,7 +22,7 @@ app.add_middleware(
 app.include_router(default_router.router)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app)
