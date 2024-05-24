@@ -1,5 +1,7 @@
 from __future__ import annotations
 from enum import IntEnum
+from typing import List, Dict
+
 from pydantic import BaseModel
 import json
 
@@ -38,18 +40,22 @@ class Question(BaseModel):
     options: list[QuestionOption] = []
     is_optional: bool = False
 
-    def get_answer_text(self) -> str:
-        if self.type == QuestionType.MULTIPLE_CHOICE or self.type == QuestionType.SINGLE_CHOICE:
-            return "\n".join(opt.text for opt in self.options if opt.is_selected)
-        if self.type == QuestionType.TEXTBOX:
-            return self.textbox.value
-        return ""
+
+class Answer(BaseModel):
+    question_name: str
+    value: QuestionTextbox | List[QuestionOption]
+
+
+class FilledPoll(BaseModel):
+    answers: list[Answer]
+    user_about: User
+    user_filling: User
 
 
 class Poll(BaseModel):
     title: str
     description: str
-    questions: list[Question]
+    questions: Dict[str, Question]
 
     def to_json(self):
         return json.dumps(self, default=lambda obj: obj.__dict__, indent=4)
