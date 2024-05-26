@@ -24,6 +24,7 @@ class Game:
             except asyncio.CancelledError:
                 pass
 
+        self.user_data[user].put_nowait("data: registered successfully\n\n")
         return event_generator()
 
     def remove_user(self, user: User):
