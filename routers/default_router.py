@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
-from starlette.requests import Request
+from fastapi.requests import Request
+from fastapi.responses import StreamingResponse
 
 from models.models import User, Poll
 from core.server import server
@@ -16,14 +17,26 @@ def root(request: Request):
     }
 
 
-@router.post("/register/")
-def register(user: User):
-    if server.game.register_user(user):
-        return status.HTTP_200_OK
+@router.get("/register/{name}")
+def register(name: str, request: Request) -> StreamingResponse:
+    register_result = server.game.register_user(User(name=name), request)
+    if register_result is not False:
+        return StreamingResponse(register_result, media_type="text/event-stream")
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
-        detail="Username already taken"
-    )
+        detail="Username already taken")
+
+
+@router.post("/start-game")
+def start_polling():
+    server.game.start_game()
+    return status.HTTP_200_OK
+
+
+@router.post("/end-game")
+def end_polling():
+    server.game.end_game()
+    return status.HTTP_200_OK
 
 
 @router.post("/poll/{name}/save")
