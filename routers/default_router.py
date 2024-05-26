@@ -41,7 +41,7 @@ def end_polling():
 
 @router.post("/poll/{name}/save")
 def save_poll(name: str, poll: Poll):
-    server.game.start_game()
+    server.save_poll(poll, name)
 
 
 @router.get("/poll/{name}/load")
