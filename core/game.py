@@ -59,9 +59,9 @@ class Game:
         answered = set()
         for answer in filled_poll.answers:
             answered.add(answer.question_name)
-            if bool(self.poll.questions[answer.question_name].options) is (
-                type(answer.value) is QuestionTextbox
-            ):
+            empty_options = len(self.poll.questions[answer.question_name].options) == 0
+            is_textbox = type(answer.value) is QuestionTextbox
+            if empty_options != is_textbox:
                 raise ValueError(f"ANSWER TO {answer.question_name} TYPE IS INCORRECT")
         for question_name, question in self.poll.questions.items():
             if not question.is_optional and question_name not in answered:
@@ -78,7 +78,7 @@ class Game:
         ] = filled_poll.answers
         return True
 
-    def check_fulfillment(self, user) -> List[User]:
+    def get_remaining_poll_targets(self, user) -> List[User]:
         """
         :param user: user for whom it is checked for which users answers are to be filled
         :return: list of user for whom polls are to be filled

@@ -32,7 +32,7 @@ class TestFillPoll(unittest.TestCase):
         self.assertTrue(server.game.user_data[user2][user1] is not None)
         self.assertTrue(len(server.game.user_data[user2][user1]) == 2)
 
-    def test_fill_pol_bad_time(self):
+    def test_fill_poll_bad_time(self):
         user1 = User(name="oilymacaroni")
         user2 = User(name="among us")
 
@@ -44,9 +44,13 @@ class TestFillPoll(unittest.TestCase):
         filled_poll = FilledPoll(
             answers=[answer1, answer2], user_about=user1, user_filling=user2
         )
-
-        validation = server.game.validate_answers(filled_poll)
-        self.assertTrue(validation is not None)
+        errors = []
+        try:
+            validation = server.game.validate_answers(filled_poll)
+        except AttributeError as e:
+            errors.append(e)
+        self.assertTrue(len(errors) == 1)
+        self.assertTrue(type(errors[0]) == AttributeError)
 
     def test_fill_poll_bad_answer(self):
         poll = server.load_poll(FILE_PATH)
