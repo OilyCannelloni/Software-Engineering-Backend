@@ -1,10 +1,7 @@
 import asyncio
-import json
-
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
-
 from models.models import User, Poll, Answer, FilledPoll, QuestionTextbox
 from typing import Dict, List
 
