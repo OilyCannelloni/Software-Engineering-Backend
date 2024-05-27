@@ -1,0 +1,37 @@
+{
+    "title": "Test Poll",
+    "description": "Testing JSON serialization",
+    "questions": {
+        "q1": {
+            "type": 2,
+            "text": "Question 1",
+            "textbox": {
+                "is_visible": false,
+                "initial_value": "",
+                "value": ""
+            },
+            "options": [
+                {
+                    "text": "opt 1",
+                    "is_selected": false
+                },
+                {
+                    "text": "opt 2",
+                    "is_selected": false
+                }
+            ],
+            "is_optional": false
+        },
+        "q2": {
+            "type": 1,
+            "text": "Question 2",
+            "textbox": {
+                "is_visible": false,
+                "initial_value": "init_val",
+                "value": ""
+            },
+            "options": [],
+            "is_optional": false
+        }
+    }
+}
