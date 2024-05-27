@@ -14,21 +14,22 @@ class Phase(IntEnum):
 
 
 class Game:
+    user_queues: Dict[User, asyncio.Queue]
     user_data: Dict[User, Dict[User, List[Answer] | None]] = {}
     phase: Phase = Phase.REGISTRATION
     poll: Poll | None = None
 
     def register_user(self, user: User, request: Request):
-        if user in self.user_data.keys():
+        if user in self.user_queues.keys():
             return False
 
-        self.user_data[user] = asyncio.Queue()
+        self.user_queues[user] = asyncio.Queue()
 
         async def event_generator():
             try:
                 while True:
                     # Wait for a new message to be available in the queue
-                    message = await self.user_data[user].get()
+                    message = await self.user_queues[user].get()
                     yield message
                     # If the client closes the connection, we break the loop
                     if await request.is_disconnected():
@@ -36,12 +37,13 @@ class Game:
             except asyncio.CancelledError:
                 pass
 
-        self.user_data[user].put_nowait("data: registered successfully\n\n")
+        self.user_queues[user].put_nowait("data: registered successfully\n\n")
         return event_generator()
 
     def remove_user(self, user: User):
-        if user in self.user_data.keys():
-            self.user_data.pop(user)
+        if user in self.user_queues.keys():
+            self.user_data.pop(user, None)  # prevents KeyError if it's not there for some reason
+            self.user_queues.pop(user)
             return True
         return False
 
@@ -114,10 +116,9 @@ class Game:
         return [user for user in self.user_data]
 
     def start_game(self):
-        for queue in self.user_data.values():
+        for queue in self.user_queues.values():
             queue.put_nowait("start\n\n")
 
     def end_game(self):
-        for queue in self.user_data.values():
+        for queue in self.user_queues.values():
             queue.put_nowait("end\n\n")
-
