@@ -1,5 +1,7 @@
+import asyncio
+from fastapi import Request
+from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
-
 from models.models import User, Poll, Answer, FilledPoll, QuestionTextbox
 from typing import Dict, List
 
@@ -11,19 +13,59 @@ class Phase(IntEnum):
 
 
 class Game:
+    user_queues: Dict[User, asyncio.Queue] = {}
     user_data: Dict[User, Dict[User, List[Answer] | None]] = {}
     phase: Phase = Phase.REGISTRATION
     poll: Poll | None = None
 
-    def register_user(self, user: User):
-        if user in self.user_data.keys():
+    def __init__(self):
+        self.user_update_queue = asyncio.Queue()
+
+    def register_user(self, user: User, request: Request):
+        if user in self.user_queues.keys():
             return False
+
+        self.user_queues[user] = asyncio.Queue()
         self.user_data[user] = {}
-        return True
+
+        async def event_generator():
+            try:
+                while True:
+                    # Wait for a new message to be available in the queue
+                    message = await self.user_queues[user].get()
+                    yield message
+                    # If the client closes the connection, we break the loop
+                    if await request.is_disconnected():
+                        break
+            except asyncio.CancelledError:
+                pass
+
+        self.user_queues[user].put_nowait("data: registered successfully\n\n")
+        self.user_update_queue.put_nowait(self.list_users())
+        return event_generator()
+
+    def stream_users(self, request: Request):
+        async def user_stream_generator():
+            try:
+                while True:
+                    users = await self.user_update_queue.get()
+                    yield f"event: lobbyUserListUpdate\ndata: {jsonable_encoder(users)}\n\n"
+                    if await request.is_disconnected():
+                        break
+
+            except asyncio.CancelledError:
+                pass
+
+        self.user_update_queue.put_nowait(self.list_users())
+        return user_stream_generator()
 
     def remove_user(self, user: User):
-        if user in self.user_data.keys():
-            self.user_data.pop(user)
+        if user in self.user_queues.keys():
+            self.user_data.pop(
+                user, None
+            )  # prevents KeyError if it's not there for some reason
+            self.user_queues.pop(user)
+            self.user_update_queue.put_nowait(self.list_users())
             return True
         return False
 
@@ -78,7 +120,7 @@ class Game:
         ] = filled_poll.answers
         return True
 
-    def get_remaining_poll_targets(self, user: User) -> List[User]:
+    def get_remaining_poll_targets(self, user) -> List[User]:
         """
         :param user: user for whom it is checked for which users answers are to be filled
         :return: list of user for whom polls are to be filled
@@ -94,3 +136,11 @@ class Game:
         :return: list of users who joined game
         """
         return [user for user in self.user_data]
+
+    def start_game(self):
+        for queue in self.user_queues.values():
+            queue.put_nowait("start\n\n")
+
+    def end_game(self):
+        for queue in self.user_queues.values():
+            queue.put_nowait("end\n\n")
