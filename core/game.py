@@ -78,7 +78,7 @@ class Game:
         ] = filled_poll.answers
         return True
 
-    def get_remaining_poll_targets(self, user) -> List[User]:
+    def get_remaining_poll_targets(self, user: User) -> List[User]:
         """
         :param user: user for whom it is checked for which users answers are to be filled
         :return: list of user for whom polls are to be filled

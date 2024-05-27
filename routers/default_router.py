@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from starlette.requests import Request
@@ -28,17 +30,17 @@ def fill_poll(filled_poll: FilledPoll):
         return status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@router.get("game/lobby/")
-def list_users():
-    def json_generator():
+@router.get("/game/lobby/")
+def list_users(request: Request):
+    async def json_generator():
         while True:
-            yield jsonable_encoder(server.game.list_users())
-    return StreamingResponse(json_generator(), media_type="application/x-ndjson")
+            yield json.dumps(server.game.list_users(), indent=4, default=str)
+    return StreamingResponse(json_generator(), media_type="application/json")
 
 
-@router.get("game/status/")
-def list_users():
-    json_compatible_item_data = jsonable_encoder(server.game.get_remaining_poll_targets())
+@router.get("/game/{user}/status")
+async def list_users(request: Request, user: str):
+    json_compatible_item_data = jsonable_encoder(server.game.get_remaining_poll_targets(user=User(name=user)))
     return JSONResponse(content=json_compatible_item_data)
 
 
