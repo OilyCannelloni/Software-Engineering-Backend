@@ -15,7 +15,7 @@ def root(request: Request):
     return {"Hello": "World", "addr": addr}
 
 
-@router.post("game/fill/")
+@router.post("/game/fill/")
 def fill_poll(filled_poll: FilledPoll):
     """
     :param filled_poll: a filled poll
@@ -28,7 +28,7 @@ def fill_poll(filled_poll: FilledPoll):
         return status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@router.get("game/lobby/")
+@router.get("/game/lobby/")
 def list_users():
     def json_generator():
         while True:
@@ -36,7 +36,7 @@ def list_users():
     return StreamingResponse(json_generator(), media_type="application/x-ndjson")
 
 
-@router.get("game/status/")
+@router.get("/game/status/")
 def list_users():
     json_compatible_item_data = jsonable_encoder(server.game.list_users())
     return JSONResponse(content=json_compatible_item_data)
