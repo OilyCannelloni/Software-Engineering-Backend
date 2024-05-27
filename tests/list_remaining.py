@@ -26,9 +26,9 @@ class TestListUsers(unittest.TestCase):
         server.game.start_polling_phase(poll)
         server.game.add_answer(filled_poll)
 
-        users_list1 = server.game.check_fulfillment(user1)
-        users_list2 = server.game.check_fulfillment(user2)
-        users_list3 = server.game.check_fulfillment(user3)
+        users_list1 = server.game.get_remaining_poll_targets(user1)
+        users_list2 = server.game.get_remaining_poll_targets(user2)
+        users_list3 = server.game.get_remaining_poll_targets(user3)
 
         self.assertEqual(len(users_list1), 2)
         self.assertEqual(len(users_list2), 1)

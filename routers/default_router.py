@@ -30,13 +30,15 @@ def fill_poll(filled_poll: FilledPoll):
 
 @router.get("game/lobby/")
 def list_users():
-    json_compatible_item_data = jsonable_encoder(server.game.list_users())
-    return JSONResponse(content=json_compatible_item_data)
+    def json_generator():
+        while True:
+            yield jsonable_encoder(server.game.list_users())
+    return StreamingResponse(json_generator(), media_type="application/x-ndjson")
 
 
 @router.get("game/status/")
 def list_users():
-    json_compatible_item_data = jsonable_encoder(server.game.check_fulfillment())
+    json_compatible_item_data = jsonable_encoder(server.game.list_users())
     return JSONResponse(content=json_compatible_item_data)
 
 
