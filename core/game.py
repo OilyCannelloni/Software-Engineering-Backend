@@ -6,6 +6,9 @@ from models.models import User, Poll, Answer, FilledPoll, QuestionTextbox
 from typing import Dict, List
 
 
+import json
+
+
 class Phase(IntEnum):
     REGISTRATION = 1
     POLLING = 2
@@ -57,7 +60,12 @@ class Game:
                     #
                     # yield f"event: lobbyUserListUpdate\ndata: {jsonable_encoder(users)}\n\n"
                     
-                    yield f"data: {jsonable_encoder(users)}\n\n"
+
+                    # jsonable_encoder DOESN'T RETURN JSON STRING, IT TRANSFORMS OBJECT TO DICT WITH VALUES OF JSON-FRIENDLY VALUES!
+                    # (source: https://fastapi.tiangolo.com/tutorial/encoder/)
+                    # That's why we need to wrap the object with json.dumps()!
+
+                    yield f"data: {json.dumps(jsonable_encoder(users))}\n\n"    
                     if await request.is_disconnected():
                         break
 
