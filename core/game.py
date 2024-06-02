@@ -49,7 +49,15 @@ class Game:
             try:
                 while True:
                     users = await self.user_update_queue.get()
-                    yield f"event: lobbyUserListUpdate\ndata: {jsonable_encoder(users)}\n\n"
+                    # 
+                    # Please don't use custom values for 'event' field.
+                    # Browsers' EventSource.prototype.onmessage expects to receive messages with "event: message", so any other value will not work.
+                    # This problem isn't reproducible with curl.
+                    # Leaving this field empty, like in register_user() is fine. 
+                    #
+                    # yield f"event: lobbyUserListUpdate\ndata: {jsonable_encoder(users)}\n\n"
+                    
+                    yield f"data: {jsonable_encoder(users)}\n\n"
                     if await request.is_disconnected():
                         break
 

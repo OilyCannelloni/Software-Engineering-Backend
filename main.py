@@ -6,7 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 
-origins = ["http://localhost:4200"]  # default URL for locally hosted Angular app
+origins = [
+    "http://localhost:4200",        # teacher's app
+    "http://localhost:4300",        # student's app
+]
 
 app = FastAPI()
 
