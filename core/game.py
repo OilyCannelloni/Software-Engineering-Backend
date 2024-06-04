@@ -155,7 +155,7 @@ class Game:
 
     def start_game(self):
         for queue in self.user_queues.values():
-            queue.put_nowait("start\n\n")
+            queue.put_nowait("data: start\n\n")
 
     def end_game(self):
         for queue in self.user_queues.values():
