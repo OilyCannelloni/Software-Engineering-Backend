@@ -1,4 +1,6 @@
 import asyncio
+from dataclasses import asdict
+
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
@@ -90,15 +92,6 @@ class Game:
             User(name=name)
         )  # this works because users are hashed by user.name
 
-    def start_polling_phase(self, poll: Poll):
-        self.user_data = {
-            k: {user: None for user in self.user_data if user is not k}
-            for k, v in self.user_data.items()
-        }
-        self.phase = Phase.POLLING
-        self.poll = poll
-        # raise NotImplementedError
-
     def validate_answers(self, filled_poll: FilledPoll) -> Exception | None:
         """
         Validates the
@@ -136,16 +129,20 @@ class Game:
         ] = filled_poll.answers
         return True
 
-    def get_remaining_poll_targets(self, user) -> List[User]:
+    def get_remaining_poll_targets(self, user: User) -> List[str]:
         """
         :param user: user for whom it is checked for which users answers are to be filled
         :return: list of user for whom polls are to be filled
         """
         return [
-            person
+            person.name
             for person in self.user_data[user]
             if self.user_data[user][person] is None
         ]
+
+    def get_answers_about(self, user: User) -> Dict[str, List[dict]]:
+        return {u.name: [asdict(i) for i in self.user_data[u][user]]
+                for u in self.user_data if (u != user and self.user_data[u][user] is not None)}
 
     def list_users(self) -> List[User]:
         """
@@ -154,6 +151,11 @@ class Game:
         return [user for user in self.user_data]
 
     def start_game(self):
+        self.user_data = {
+            k: {user: None for user in self.user_data if user is not k}
+            for k, v in self.user_data.items()
+        }
+        self.phase = Phase.POLLING
         for queue in self.user_queues.values():
             queue.put_nowait("data: start\n\n")
 

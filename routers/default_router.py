@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, HTTPException, status
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -38,8 +40,16 @@ async def list_users(request: Request):
 
 @router.get("/game/{user}/status")
 async def list_remaining_users(request: Request, user: str):
-    json_compatible_item_data = jsonable_encoder(
+    json_compatible_item_data = json.dumps(
         server.game.get_remaining_poll_targets(user=User(name=user))
+    )
+    return JSONResponse(content=json_compatible_item_data)
+
+
+@router.get("/game/{user}/polls")
+async def list_answers_about(user: str):
+    json_compatible_item_data = json.dumps(
+        server.game.get_answers_about(user=User(name=user))
     )
     return JSONResponse(content=json_compatible_item_data)
 
