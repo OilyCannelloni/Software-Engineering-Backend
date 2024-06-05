@@ -1,13 +1,15 @@
 import pathlib
 import unittest
 from models.models import *
-from core.server import server
+from core.server import Server
 
 FILE_PATH = "test-poll-load-save-1"
 
 
 class TestPollLoadSave(unittest.TestCase):
     def test_poll_load_save(self):
+        server = Server()
+
         q1 = Question(
             text="Question 1",
             type=QuestionType.MULTIPLE_CHOICE,

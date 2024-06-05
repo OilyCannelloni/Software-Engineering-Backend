@@ -9,7 +9,7 @@ class TestRegisterUser(unittest.TestCase):
         game = Game()
         user = User(name="oilymacaroni")
 
-        status = game.register_user(user)
+        status = game._register_user_local(user)
 
         self.assertTrue(status)
         self.assertTrue(user in game.user_data.keys())
@@ -17,7 +17,7 @@ class TestRegisterUser(unittest.TestCase):
     def test_remove(self):
         game = Game()
         user = User(name="oilymacaroni")
-        game.register_user(user)
+        game._register_user_local(user)
 
         status = game.remove_user(User(name="abc"))
         self.assertFalse(status)
@@ -30,7 +30,7 @@ class TestRegisterUser(unittest.TestCase):
     def test_remove_by_name(self):
         game = Game()
         user = User(name="oilymacaroni")
-        game.register_user(user)
+        game._register_user_local(user)
 
         status = game.remove_user_by_name("abc")
         self.assertFalse(status)
