@@ -47,7 +47,7 @@ async def list_users(request: Request):
 
 
 @router.get("/game/{user}/status")
-async def list_remaining_users(request: Request, user: str):
+async def list_remaining_users(user: str):
     json_compatible_item_data = json.dumps(
         server.game.get_remaining_poll_targets(user=User(name=user))
     )
@@ -55,9 +55,10 @@ async def list_remaining_users(request: Request, user: str):
 
 
 @router.get("/game/{user}/polls")
-async def list_answers_about(user: str):
+async def list_answers_about(username: str):
     json_compatible_item_data = json.dumps(
-        server.game.get_answers_about(user=User(name=user))
+        server.game.get_answers_about(user=User(name=username)),
+        default=lambda obj: obj.__dict__, indent=4
     )
     return JSONResponse(content=json_compatible_item_data)
 
