@@ -18,20 +18,16 @@ class Phase(IntEnum):
 
 
 class Game:
-    user_queues: Dict[User, asyncio.Queue] = {}
-    user_data: Dict[User, Dict[User, List[Answer] | None]] = {}
-    phase: Phase = Phase.REGISTRATION
-    poll: Poll | None = None
-
     def __init__(self):
         self.user_update_queue = asyncio.Queue()
+        self.user_queues = {}
+        self.user_data = {}
+        self.phase = Phase.REGISTRATION
+        self.poll = None
 
     def register_user(self, user: User, request: Request):
-        if user in self.user_queues.keys():
+        if not self._register_user_local(user):
             return False
-
-        self.user_queues[user] = asyncio.Queue()
-        self.user_data[user] = {}
 
         async def event_generator():
             try:
@@ -48,6 +44,13 @@ class Game:
         self.user_queues[user].put_nowait("data: registered successfully\n\n")
         self.user_update_queue.put_nowait(self.list_users())
         return event_generator()
+
+    def _register_user_local(self, user: User):
+        if user in self.user_queues.keys():
+            return False
+        self.user_queues[user] = asyncio.Queue()
+        self.user_data[user] = {}
+        return True
 
     def stream_users(self, request: Request):
         async def user_stream_generator():
@@ -92,6 +95,11 @@ class Game:
             User(name=name)
         )  # this works because users are hashed by user.name
 
+    def set_poll(self, poll: Poll):
+        if self.phase != Phase.REGISTRATION and self.poll is not None:
+            raise AttributeError("Cannot change poll during polling phase")
+        self.poll = poll
+
     def validate_answers(self, filled_poll: FilledPoll) -> Exception | None:
         """
         Validates the
@@ -132,7 +140,7 @@ class Game:
     def get_remaining_poll_targets(self, user: User) -> List[str]:
         """
         :param user: user for whom it is checked for which users answers are to be filled
-        :return: list of user for whom polls are to be filled
+        :return: list of usernames for whom polls are to be filled
         """
         return [
             person.name
@@ -140,8 +148,8 @@ class Game:
             if self.user_data[user][person] is None
         ]
 
-    def get_answers_about(self, user: User) -> Dict[str, List[dict]]:
-        return {u.name: [asdict(i) for i in self.user_data[u][user]]
+    def get_answers_about(self, user: User) -> Dict[str, List[Answer]]:
+        return {u.name: self.user_data[u][user]
                 for u in self.user_data if (u != user and self.user_data[u][user] is not None)}
 
     def list_users(self) -> List[User]:
@@ -151,6 +159,9 @@ class Game:
         return [user for user in self.user_data]
 
     def start_game(self):
+        if self.poll is None:
+            raise AttributeError("Cannot start game without a poll, use game.set_poll() first!")
+
         self.user_data = {
             k: {user: None for user in self.user_data if user is not k}
             for k, v in self.user_data.items()
