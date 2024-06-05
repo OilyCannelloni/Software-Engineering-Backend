@@ -83,6 +83,6 @@ def load_poll(name: str) -> Poll:
     return server.load_poll(name)
 
 
-@router.get("ip")
+@router.get("/ip")
 def get_ip():
-    return server.get_ip()
+    return JSONResponse(content=dict([("ipAddress", server.get_ip())]))

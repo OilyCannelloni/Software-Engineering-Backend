@@ -75,11 +75,11 @@ class Server:
         if os_name == "Windows":
             return get_win_ip_address()
         elif os_name == "Darwin":
-            return get_linux_ip_address()
+            raise NotImplementedError("MacOS is not supported")
         elif os_name == "Linux":
             return get_linux_ip_address()
         else:
-            print(f"Unsupported OS: {os_name}")
+            raise NotImplementedError(f"{os_name} is not supported")
 
 
 server = Server()
