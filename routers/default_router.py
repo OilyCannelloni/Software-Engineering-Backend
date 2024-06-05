@@ -81,3 +81,8 @@ def save_poll(name: str, poll: Poll):
 @router.get("/poll/{name}/load")
 def load_poll(name: str) -> Poll:
     return server.load_poll(name)
+
+
+@router.get("ip")
+def get_ip():
+    return server.get_ip()
