@@ -27,7 +27,16 @@ def fill_poll(filled_poll: FilledPoll):
         server.game.add_answer(filled_poll)
         return status.HTTP_200_OK
     except KeyError:
-        return status.HTTP_500_INTERNAL_SERVER_ERROR
+        return status.HTTP_400_BAD_REQUEST
+
+
+@router.post("/poll/set")
+def fill_poll(poll: Poll):
+    """
+    :param poll: A poll to set
+    :return: a HTTP response
+    """
+    server.game.poll = Poll
 
 
 @router.get("/game/lobby")
