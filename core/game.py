@@ -1,5 +1,4 @@
 import asyncio
-from time import sleep
 
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
