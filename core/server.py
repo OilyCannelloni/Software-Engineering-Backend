@@ -19,4 +19,4 @@ class Server:
             return Poll.from_json(content)
 
 
-server = Server()
+# server = Server()
