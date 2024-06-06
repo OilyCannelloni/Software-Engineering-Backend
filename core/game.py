@@ -134,6 +134,8 @@ class Game:
         self.user_data[filled_poll.user_filling][
             filled_poll.user_about
         ] = filled_poll.answers
+        if self.check_finish_polls():
+            self.end_game()
         return True
 
     def get_remaining_poll_targets(self, user) -> List[User]:
@@ -153,10 +155,18 @@ class Game:
         """
         return [user for user in self.user_data]
 
+    def check_finish_polls(self) -> bool:
+        for user in self.user_data:
+            for person in self.user_data[user]:
+                if self.user_data[user][person] is None:
+                    return False
+        return True
+
     def start_game(self):
         for queue in self.user_queues.values():
             queue.put_nowait("data: start\n\n")
 
     def end_game(self):
+        self.phase = Phase.ENDGAME
         for queue in self.user_queues.values():
             queue.put_nowait("end\n\n")
