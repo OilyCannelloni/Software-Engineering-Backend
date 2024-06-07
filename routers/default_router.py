@@ -63,15 +63,6 @@ async def list_answers_about(username: str):
     return JSONResponse(content=json_compatible_item_data)
 
 
-@router.get("/game/{user}/polls")
-async def list_answers_about(username: str):
-    json_compatible_item_data = json.dumps(
-        server.game.get_answers_about(user=User(name=username)),
-        default=lambda obj: obj.__dict__, indent=4
-    )
-    return JSONResponse(content=json_compatible_item_data)
-
-
 @router.get("/register/{name}")
 async def register(name: str, request: Request) -> StreamingResponse:
     register_result = server.game.register_user(User(name=name), request)
