@@ -80,13 +80,13 @@ def remove_user_by_name(name: str):
     return status.HTTP_304_NOT_MODIFIED
 
 
-@router.post("/start-game")
+@router.post("/game/start")
 def start_polling():
     server.game.start_game()
     return status.HTTP_200_OK
 
 
-@router.post("/end-game")
+@router.post("/game/end")
 def end_polling():
     server.game.end_game()
     return status.HTTP_200_OK
