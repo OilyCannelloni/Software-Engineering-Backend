@@ -81,3 +81,14 @@ def save_poll(name: str, poll: Poll):
 @router.get("/poll/{name}/load")
 def load_poll(name: str) -> Poll:
     return server.load_poll(name)
+
+
+@router.get("/polls")
+def list_polls():
+    return server.get_all_pools()
+
+
+@router.delete("/poll/{name}")
+def delete_poll(name: str):
+    server.remove_pool(name)
+    return status.HTTP_204_NO_CONTENT
