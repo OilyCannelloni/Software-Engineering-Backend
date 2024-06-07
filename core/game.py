@@ -1,4 +1,5 @@
 import asyncio
+
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
@@ -37,8 +38,9 @@ class Game:
                     # Wait for a new message to be available in the queue
                     message = await self.user_queues[user].get()
                     yield message
+
                     # If the client closes the connection, we break the loop
-                    if await request.is_disconnected():
+                    if await request.is_disconnected() or message == "data: removed\n\n":
                         break
             except asyncio.CancelledError:
                 pass
@@ -77,10 +79,10 @@ class Game:
 
     def remove_user(self, user: User):
         if user in self.user_queues.keys():
+            self.user_queues.pop(user).put_nowait("data: removed from lobby\n\n")
             self.user_data.pop(
                 user, None
             )  # prevents KeyError if it's not there for some reason
-            self.user_queues.pop(user)
             self.user_update_queue.put_nowait(self.list_users())
             return True
         return False
