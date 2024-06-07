@@ -44,7 +44,7 @@ async def list_remaining_users(request: Request, user: str):
     return JSONResponse(content=json_compatible_item_data)
 
 
-@router.get("/register/{name}")
+@router.get("/user/register/{name}")
 async def register(name: str, request: Request) -> StreamingResponse:
     register_result = server.game.register_user(User(name=name), request)
     if register_result is not False:
@@ -54,20 +54,20 @@ async def register(name: str, request: Request) -> StreamingResponse:
     )
 
 
-@router.post("/remove/{name}")
+@router.post("/user/remove/{name}")
 def remove_user_by_name(name: str):
     if server.game.remove_user_by_name(name):
         return status.HTTP_200_OK
     return status.HTTP_304_NOT_MODIFIED
 
 
-@router.post("/start-game")
+@router.post("/game/start")
 def start_polling():
     server.game.start_game()
     return status.HTTP_200_OK
 
 
-@router.post("/end-game")
+@router.post("/game/end")
 def end_polling():
     server.game.end_game()
     return status.HTTP_200_OK
