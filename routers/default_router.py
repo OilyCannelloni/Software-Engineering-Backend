@@ -1,13 +1,14 @@
+import json
+
 from fastapi import APIRouter, HTTPException, status
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
-from fastapi.encoders import jsonable_encoder
 
 from models.models import User, Poll, FilledPoll
-from core.server import server
+import core.server
 
 router = APIRouter()
-
+server = core.server.Server()
 
 @router.get("/")
 def root(request: Request):
@@ -25,7 +26,16 @@ def fill_poll(filled_poll: FilledPoll):
         server.game.add_answer(filled_poll)
         return status.HTTP_200_OK
     except KeyError:
-        return status.HTTP_500_INTERNAL_SERVER_ERROR
+        return status.HTTP_400_BAD_REQUEST
+
+
+@router.post("/poll/set")
+def fill_poll(poll: Poll):
+    """
+    :param poll: A poll to set
+    :return: a HTTP response
+    """
+    server.game.poll = Poll
 
 
 @router.get("/game/lobby")
@@ -37,11 +47,21 @@ async def list_users(request: Request):
 
 
 @router.get("/game/{user}/status")
-async def list_remaining_users(request: Request, user: str):
-    json_compatible_item_data = jsonable_encoder(
+async def list_remaining_users(user: str):
+    json_compatible_item_data = json.dumps(
         server.game.get_remaining_poll_targets(user=User(name=user))
     )
     return JSONResponse(content=json_compatible_item_data)
+
+
+@router.get("/game/{user}/polls")
+async def list_answers_about(username: str):
+    json_compatible_item_data = json.dumps(
+        server.game.get_answers_about(user=User(name=username)),
+        default=lambda obj: obj.__dict__, indent=4
+    )
+    return JSONResponse(content=json_compatible_item_data)
+
 
 
 @router.get("/user/register/{name}")
