@@ -4,7 +4,8 @@ from itertools import product
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
-from models.models import User, Poll, FilledPoll, QuestionTextbox, SingleQuestionPollResults, SingleAnswer
+from models.models import User, Poll, FilledPoll, QuestionTextbox, SingleQuestionPollResults, SingleAnswer, \
+    SinglePersonPollResults, PollResults
 from typing import Dict, List
 
 import json
@@ -116,10 +117,6 @@ class Game:
         answered = set()
         for answer in filled_poll.answers:
             answered.add(answer.question_name)
-            empty_options = len(self.poll.questions[answer.question_name].options) == 0
-            is_textbox = type(answer.value) is QuestionTextbox
-            if empty_options != is_textbox:
-                raise ValueError(f"ANSWER TO {answer.question_name} TYPE IS INCORRECT")
         for question_name, question in self.poll.questions.items():
             if not question.is_optional and question_name not in answered:
                 raise ValueError(f"QUESTION {question_name} HAS TO BE ANSWERED")
@@ -152,32 +149,30 @@ class Game:
         return {u.name: self.user_data[u][user]
                 for u in self.user_data if (u != user and self.user_data[u][user] is not None)}
 
-    def get_all_answers(self) -> List[SingleQuestionPollResults]:
+    def get_all_answers(self) -> PollResults:
         question_to_answers_mapping = {}
         for user in self.user_data:
             for user1 in self.user_data[user]:
                 for answer in self.user_data[user][user1]:
                     if answer.question_name not in question_to_answers_mapping:
-                        question_to_answers_mapping[answer.question_name] = {user.name: [{user1.name: answer.answer}]}
+                        question_to_answers_mapping[answer.question_name] = {user.name: {user1.name: answer.answer}}
+                    elif user.name not in question_to_answers_mapping[answer.question_name]:
+                        question_to_answers_mapping[answer.question_name][user.name] = {user1.name: answer.answer}
                     else:
-                        if user.name not in question_to_answers_mapping[answer.question_name]:
-                            question_to_answers_mapping[answer.question_name][user.name] = [{user1.name: answer.answer}]
-                        else:
-                            question_to_answers_mapping[answer.question_name][user.name].append(
-                                {user1.name: answer.answer})
-        return [SingleQuestionPollResults(personName=u.name,
-                                          questions=[
-                                              SingleQuestionPollResults(
-                                                  question=q,
-                                                  answers=[
-                                                      SingleAnswer(
-                                                          respondentName=v.name,
-                                                          answer=question_to_answers_mapping[q][v][u]
-                                                      )
-                                                      for v in self.user_data if v is not u
-                                                  ]
-                                              )
-                                              for q in question_to_answers_mapping]) for u in self.user_data]
+                        question_to_answers_mapping[answer.question_name][user.name][user1.name] = answer.answer
+        return PollResults(results=[SinglePersonPollResults(personName=u.name,
+                                        questions=[
+                                            SingleQuestionPollResults(
+                                                question=q,
+                                                answers=[
+                                                    SingleAnswer(
+                                                        respondentName=v.name,
+                                                        answer=question_to_answers_mapping[q][v.name][u.name]
+                                                    )
+                                                    for v in self.user_data[u]
+                                                ]
+                                            )
+                                            for q in question_to_answers_mapping]) for u in self.user_data])
         # return [FilledPoll(answers=self.user_data[u][v], user_about=v, user_filling=u) ]
 
     def list_users(self) -> List[User]:

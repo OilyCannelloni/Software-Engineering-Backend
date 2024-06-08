@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
@@ -30,12 +31,12 @@ def fill_poll(filled_poll: FilledPoll):
 
 
 @router.post("/poll/set")
-def fill_poll(poll: Poll):
+def set_poll(poll: Poll):
     """
     :param poll: A poll to set
     :return: a HTTP response
     """
-    server.game.poll = Poll
+    server.game.set_poll(poll)
 
 
 @router.get("/game/lobby")
@@ -66,7 +67,7 @@ async def list_answers_about(username: str):
 @router.get("/game/polls/all")
 async def list_all_answers():
     json_compatible_item_data = json.dumps(
-        server.game.get_all_answers(),
+        jsonable_encoder(server.game.get_all_answers()),
         default=lambda obj: obj.__dict__, indent=4
     )
     return JSONResponse(content=json_compatible_item_data)

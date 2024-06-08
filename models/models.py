@@ -65,13 +65,9 @@ class Poll(BaseModel):
         return Poll(**json.loads(json_content))
 
 
-class PollResults(BaseModel):
-    SinglePersonPollResults: List[SinglePersonPollResults]
-
-
-class SinglePersonPollResults(BaseModel):
-    personName: str
-    questions: List[SingleQuestionPollResults]
+class SingleAnswer(BaseModel):
+    respondentName: str
+    answer: str
 
 
 class SingleQuestionPollResults(BaseModel):
@@ -79,6 +75,10 @@ class SingleQuestionPollResults(BaseModel):
     answers: List[SingleAnswer]
 
 
-class SingleAnswer(BaseModel):
-    respondentName: str
-    answer: str
+class SinglePersonPollResults(BaseModel):
+    personName: str
+    questions: List[SingleQuestionPollResults]
+
+
+class PollResults(BaseModel):
+    results: List[SinglePersonPollResults]
