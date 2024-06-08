@@ -63,7 +63,8 @@ async def list_answers_about(username: str):
     return JSONResponse(content=json_compatible_item_data)
 
 
-@router.get("/register/{name}")
+
+@router.get("/user/register/{name}")
 async def register(name: str, request: Request) -> StreamingResponse:
     register_result = server.game.register_user(User(name=name), request)
     if register_result is not False:
@@ -73,7 +74,7 @@ async def register(name: str, request: Request) -> StreamingResponse:
     )
 
 
-@router.post("/remove/{name}")
+@router.post("/user/remove/{name}")
 def remove_user_by_name(name: str):
     if server.game.remove_user_by_name(name):
         return status.HTTP_200_OK

@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import asdict
 
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
@@ -35,8 +34,9 @@ class Game:
                     # Wait for a new message to be available in the queue
                     message = await self.user_queues[user].get()
                     yield message
+
                     # If the client closes the connection, we break the loop
-                    if await request.is_disconnected():
+                    if await request.is_disconnected() or message == "data: removed\n\n":
                         break
             except asyncio.CancelledError:
                 pass
@@ -80,10 +80,10 @@ class Game:
 
     def remove_user(self, user: User):
         if user in self.user_queues.keys():
+            self.user_queues.pop(user).put_nowait("data: removed from lobby\n\n")
             self.user_data.pop(
                 user, None
             )  # prevents KeyError if it's not there for some reason
-            self.user_queues.pop(user)
             self.user_update_queue.put_nowait(self.list_users())
             return True
         return False
@@ -133,6 +133,8 @@ class Game:
         self.user_data[filled_poll.user_filling][
             filled_poll.user_about
         ] = filled_poll.answers
+        if self.check_finish_polls():
+            self.end_game()
         return True
 
     def get_remaining_poll_targets(self, user: User) -> List[str]:
@@ -156,6 +158,13 @@ class Game:
         """
         return [user for user in self.user_data]
 
+    def check_finish_polls(self) -> bool:
+        for user in self.user_data:
+            for person in self.user_data[user]:
+                if self.user_data[user][person] is None:
+                    return False
+        return True
+
     def start_game(self):
         if self.poll is None:
             raise AttributeError("Cannot start game without a poll, use game.set_poll() first!")
@@ -169,5 +178,6 @@ class Game:
             queue.put_nowait("data: start\n\n")
 
     def end_game(self):
+        self.phase = Phase.ENDGAME
         for queue in self.user_queues.values():
             queue.put_nowait("end\n\n")
