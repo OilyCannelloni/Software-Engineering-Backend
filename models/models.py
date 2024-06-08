@@ -43,7 +43,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     question_name: str
-    value: QuestionTextbox | List[QuestionOption]
+    answer: str
 
 
 class FilledPoll(BaseModel):
@@ -63,3 +63,22 @@ class Poll(BaseModel):
     @classmethod
     def from_json(cls, json_content) -> Poll:
         return Poll(**json.loads(json_content))
+
+
+class PollResults(BaseModel):
+    SinglePersonPollResults: List[SinglePersonPollResults]
+
+
+class SinglePersonPollResults(BaseModel):
+    personName: str
+    questions: List[SingleQuestionPollResults]
+
+
+class SingleQuestionPollResults(BaseModel):
+    question: str
+    answers: List[SingleAnswer]
+
+
+class SingleAnswer(BaseModel):
+    respondentName: str
+    answer: str
