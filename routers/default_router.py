@@ -66,7 +66,7 @@ async def list_answers_about(username: str):
 
 @router.get("/game/polls/all")
 async def list_all_answers():
-    json_compatible_item_data = jsonable_encoder(server.game.get_all_answers()),
+    json_compatible_item_data = jsonable_encoder(server.game.get_all_answers())
 
     return JSONResponse(content=json_compatible_item_data, status_code=200)
 
