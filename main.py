@@ -7,8 +7,8 @@ import uvicorn
 
 
 origins = [
-    "http://localhost:4200",        # teacher's app
-    "http://localhost:4300",        # student's app
+    "http://localhost:4200",  # teacher's app
+    "http://localhost:4300",  # student's app
 ]
 
 app = FastAPI()

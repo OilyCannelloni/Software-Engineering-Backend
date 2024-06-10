@@ -24,4 +24,3 @@ class TestListUsers(unittest.TestCase):
         self.assertEqual(self.user1, users_list[0])
         self.assertEqual(self.user2, users_list[1])
         self.assertEqual(self.user1.name, users_list[0].name)
-

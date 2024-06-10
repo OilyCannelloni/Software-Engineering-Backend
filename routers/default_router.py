@@ -11,6 +11,7 @@ import core.server
 router = APIRouter()
 server = core.server.Server()
 
+
 @router.get("/")
 def root(request: Request):
     addr = f"{request.client.host}:{request.client.port}"
@@ -59,7 +60,8 @@ async def list_remaining_users(user: str):
 async def list_answers_about(username: str):
     json_compatible_item_data = json.dumps(
         server.game.get_answers_about(user=User(name=username)),
-        default=lambda obj: obj.__dict__, indent=4
+        default=lambda obj: obj.__dict__,
+        indent=4,
     )
     return JSONResponse(content=json_compatible_item_data)
 
