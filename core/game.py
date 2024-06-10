@@ -212,6 +212,9 @@ class Game:
                     return False
         return True
 
+    def get_game_data(self):
+        return GameData(users=list(self.user_data.keys()), poll=self.poll)
+
     def start_game(self):
         if self.poll is None:
             raise AttributeError(
