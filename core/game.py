@@ -1,11 +1,11 @@
 import asyncio
+from itertools import product
 
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from enum import IntEnum
-from models.models import User, Poll, Answer, FilledPoll, QuestionTextbox
+from models.models import *
 from typing import Dict, List
-
 
 import json
 
@@ -36,7 +36,10 @@ class Game:
                     yield message
 
                     # If the client closes the connection, we break the loop
-                    if await request.is_disconnected() or message == "data: removed\n\n":
+                    if (
+                        await request.is_disconnected()
+                        or message == "data: removed\n\n"
+                    ):
                         break
             except asyncio.CancelledError:
                 pass
@@ -57,7 +60,7 @@ class Game:
             try:
                 while True:
                     users = await self.user_update_queue.get()
-                    # 
+                    #
                     # Please don't use custom values for 'event' field. Browsers' EventSource.prototype.onmessage
                     # expects to receive messages with "event: message", so any other value will not work. This
                     # problem isn't reproducible with curl. Leaving this field empty, like in register_user() is fine.
@@ -116,10 +119,6 @@ class Game:
         answered = set()
         for answer in filled_poll.answers:
             answered.add(answer.question_name)
-            empty_options = len(self.poll.questions[answer.question_name].options) == 0
-            is_textbox = type(answer.value) is QuestionTextbox
-            if empty_options != is_textbox:
-                raise ValueError(f"ANSWER TO {answer.question_name} TYPE IS INCORRECT")
         for question_name, question in self.poll.questions.items():
             if not question.is_optional and question_name not in answered:
                 raise ValueError(f"QUESTION {question_name} HAS TO BE ANSWERED")
@@ -148,9 +147,57 @@ class Game:
             if self.user_data[user][person] is None
         ]
 
-    def get_answers_about(self, user: User) -> Dict[str, List[Answer]]:
-        return {u.name: self.user_data[u][user]
-                for u in self.user_data if (u != user and self.user_data[u][user] is not None)}
+    def get_answers_about(self, user: User):
+        return {
+            u.name: self.user_data[u][user]
+            for u in self.user_data
+            if (u != user and self.user_data[u][user] is not None)
+        }
+
+    def get_all_answers(self) -> PollResults:
+        question_to_answers_mapping = {}
+        for user in self.user_data:
+            for user1 in self.user_data[user]:
+                for answer in self.user_data[user][user1]:
+                    if answer.question_name not in question_to_answers_mapping:
+                        question_to_answers_mapping[answer.question_name] = {
+                            user.name: {user1.name: answer.answer}
+                        }
+                    elif (
+                        user.name
+                        not in question_to_answers_mapping[answer.question_name]
+                    ):
+                        question_to_answers_mapping[answer.question_name][user.name] = {
+                            user1.name: answer.answer
+                        }
+                    else:
+                        question_to_answers_mapping[answer.question_name][user.name][
+                            user1.name
+                        ] = answer.answer
+        return PollResults(
+            results=[
+                SinglePersonPollResults(
+                    personName=u.name,
+                    questions=[
+                        SingleQuestionPollResults(
+                            question=q,
+                            answers=[
+                                SingleAnswer(
+                                    respondentName=v.name,
+                                    answer=question_to_answers_mapping[q][v.name][
+                                        u.name
+                                    ],
+                                )
+                                for v in self.user_data[u]
+                            ],
+                        )
+                        for q in question_to_answers_mapping
+                    ],
+                )
+                for u in self.user_data
+            ]
+        )
+        # return [FilledPoll(answers=self.user_data[u][v], user_about=v, user_filling=u) ]
 
     def list_users(self) -> List[User]:
         """
@@ -167,7 +214,9 @@ class Game:
 
     def start_game(self):
         if self.poll is None:
-            raise AttributeError("Cannot start game without a poll, use game.set_poll() first!")
+            raise AttributeError(
+                "Cannot start game without a poll, use game.set_poll() first!"
+            )
 
         self.user_data = {
             k: {user: None for user in self.user_data if user is not k}
