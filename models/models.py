@@ -82,3 +82,8 @@ class SinglePersonPollResults(BaseModel):
 
 class PollResults(BaseModel):
     results: List[SinglePersonPollResults]
+
+
+class GameData(BaseModel):
+    users: List[User]
+    poll: Poll
