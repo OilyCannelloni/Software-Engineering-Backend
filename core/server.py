@@ -3,7 +3,7 @@ from typing import List
 import socket
 
 from core.game import Game
-from models.models import Poll
+from models.models import Poll, FilledPoll
 from fastapi import HTTPException, status
 
 
@@ -50,6 +50,7 @@ class Server:
         full_filename = f"{Server.pool_save_path}{filename}"
         if os.path.exists(full_filename):
             os.remove(full_filename)
+
     @staticmethod
     def get_ip():
         try:

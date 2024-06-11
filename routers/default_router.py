@@ -121,7 +121,15 @@ def list_polls():
 def delete_poll(name: str):
     server.remove_pool(name)
     return status.HTTP_204_NO_CONTENT
-  
+
+
 @router.get("/ip")
 def get_ip():
     return JSONResponse(content=dict([("ipAddress", server.get_ip())]))
+
+
+@router.post("/game/answer/save")
+def save_answer(filledPoll: FilledPoll):
+    if server.game.add_answer(filledPoll):
+        return status.HTTP_200_OK
+    return status.HTTP_304_NOT_MODIFIED
