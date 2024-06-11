@@ -112,6 +112,16 @@ def load_poll(name: str) -> Poll:
     return server.load_poll(name)
 
 
+@router.get("/polls")
+def list_polls():
+    return server.get_all_pools()
+
+
+@router.delete("/poll/{name}")
+def delete_poll(name: str):
+    server.remove_pool(name)
+    return status.HTTP_204_NO_CONTENT
+  
 @router.get("/ip")
 def get_ip():
     return JSONResponse(content=dict([("ipAddress", server.get_ip())]))
