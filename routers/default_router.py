@@ -31,15 +31,6 @@ def fill_poll(filled_poll: FilledPoll):
         return status.HTTP_400_BAD_REQUEST
 
 
-@router.post("/poll/set")
-def set_poll(poll: Poll):
-    """
-    :param poll: A poll to set
-    :return: a HTTP response
-    """
-    server.game.set_poll(poll)
-
-
 @router.get("/game/lobby")
 async def list_users(request: Request):
     result = server.game.stream_users(request)
@@ -97,7 +88,10 @@ def remove_user_by_name(name: str):
 
 
 @router.post("/game/start")
-def start_polling():
+def start_polling(poll: Poll | str):
+    if isinstance(poll, str):
+        poll = server.load_poll(poll)
+    server.game.set_poll(poll)
     server.game.start_game()
     return status.HTTP_200_OK
 
@@ -116,3 +110,26 @@ def save_poll(name: str, poll: Poll):
 @router.get("/poll/{name}/load")
 def load_poll(name: str) -> Poll:
     return server.load_poll(name)
+
+
+@router.get("/polls")
+def list_polls():
+    return server.get_all_pools()
+
+
+@router.delete("/poll/{name}")
+def delete_poll(name: str):
+    server.remove_pool(name)
+    return status.HTTP_204_NO_CONTENT
+
+
+@router.get("/ip")
+def get_ip():
+    return JSONResponse(content=dict([("ipAddress", server.get_ip())]))
+
+
+@router.post("/game/answer/save")
+def save_answer(filledPoll: FilledPoll):
+    if server.game.add_answer(filledPoll):
+        return status.HTTP_200_OK
+    return status.HTTP_304_NOT_MODIFIED

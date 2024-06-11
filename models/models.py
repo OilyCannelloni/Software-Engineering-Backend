@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import List, Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 import json
 
 
@@ -52,6 +52,10 @@ class FilledPoll(BaseModel):
     user_filling: User
 
 
+class PollDecodeError(Exception):
+    pass
+
+
 class Poll(BaseModel):
     title: str
     description: str
@@ -62,7 +66,10 @@ class Poll(BaseModel):
 
     @classmethod
     def from_json(cls, json_content) -> Poll:
-        return Poll(**json.loads(json_content))
+        try:
+            return Poll(**json.loads(json_content))
+        except (ValidationError, TypeError, json.JSONDecodeError) as err:
+            raise PollDecodeError from err
 
 
 class SingleAnswer(BaseModel):
