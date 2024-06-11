@@ -1,5 +1,6 @@
 import os
 from typing import List
+import socket
 
 from core.game import Game
 from models.models import Poll
@@ -49,6 +50,16 @@ class Server:
         full_filename = f"{Server.pool_save_path}{filename}"
         if os.path.exists(full_filename):
             os.remove(full_filename)
+    @staticmethod
+    def get_ip():
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            return local_ip
+        except Exception as e:
+            return f"Error: {e}"
 
 
-server = Server()
+# server = Server()
