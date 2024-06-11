@@ -3,7 +3,7 @@ from typing import List
 import socket
 
 from core.game import Game
-from models.models import Poll, FilledPoll
+from models.models import Poll, PollDecodeError
 from fastapi import HTTPException, status
 
 
@@ -36,9 +36,20 @@ class Server:
     def load_poll(filename: str) -> Poll:
         Server.__no_dir_in_path(filename)
         full_filename = f"{Server.pool_save_path}{filename}"
-        with open(full_filename, "r") as file:
-            content = file.read()
-            return Poll.from_json(content)
+        try:
+            with open(full_filename, "r") as file:
+                content = file.read()
+                return Poll.from_json(content)
+        except OSError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No such file: {filename}"
+            )
+        except PollDecodeError:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"Invalid file content of {filename}",
+            )
 
     @staticmethod
     def get_all_pools() -> List[str]:
@@ -50,6 +61,11 @@ class Server:
         full_filename = f"{Server.pool_save_path}{filename}"
         if os.path.exists(full_filename):
             os.remove(full_filename)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_304_NOT_MODIFIED,
+                detail=f"No such file: {filename}"
+            )
 
     @staticmethod
     def get_ip():
