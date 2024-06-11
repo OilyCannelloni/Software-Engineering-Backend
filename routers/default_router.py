@@ -31,15 +31,6 @@ def fill_poll(filled_poll: FilledPoll):
         return status.HTTP_400_BAD_REQUEST
 
 
-@router.post("/poll/set")
-def set_poll(poll: Poll):
-    """
-    :param poll: A poll to set
-    :return: a HTTP response
-    """
-    server.game.set_poll(poll)
-
-
 @router.get("/game/lobby")
 async def list_users(request: Request):
     result = server.game.stream_users(request)
@@ -91,7 +82,10 @@ def remove_user_by_name(name: str):
 
 
 @router.post("/game/start")
-def start_polling():
+def start_polling(poll: Poll | str):
+    if isinstance(poll, str):
+        poll = server.load_poll(poll)
+    server.game.set_poll(poll)
     server.game.start_game()
     return status.HTTP_200_OK
 
