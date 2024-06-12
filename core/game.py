@@ -158,6 +158,8 @@ class Game:
         question_to_answers_mapping = {}
         for user in self.user_data:
             for user1 in self.user_data[user]:
+                if not self.user_data[user][user1]:
+                    continue
                 for answer in self.user_data[user][user1]:
                     if answer.question_name not in question_to_answers_mapping:
                         question_to_answers_mapping[answer.question_name] = {
