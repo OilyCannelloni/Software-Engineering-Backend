@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
-from models.models import User, Poll, FilledPoll
+from models.models import User, Poll, FilledPoll, GameData
 import core.server
 
 router = APIRouter()
@@ -37,6 +37,12 @@ async def list_users(request: Request):
     if result is not None:
         return StreamingResponse(result, media_type="text/event-stream")
     raise HTTPException(500)
+
+
+@router.get("/game/data")
+async def get_game_data(request: Request):
+    data = jsonable_encoder(server.game.get_game_data().__dict__)
+    return JSONResponse(content=data, status_code=status.HTTP_200_OK)
 
 
 @router.get("/game/{user}/status")
