@@ -42,7 +42,7 @@ async def list_users(request: Request):
 @router.get("/game/data")
 async def get_game_data(request: Request):
     data = jsonable_encoder(server.game.get_game_data().__dict__)
-    return JSONResponse(content=json.dumps(data), status_code=status.HTTP_200_OK)
+    return JSONResponse(content=data, status_code=status.HTTP_200_OK)
 
 
 @router.get("/game/{user}/status")
