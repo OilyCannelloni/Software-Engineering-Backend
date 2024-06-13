@@ -37,8 +37,8 @@ class Game:
 
                     # If the client closes the connection, we break the loop
                     if (
-                        await request.is_disconnected()
-                        or message == "data: removed\n\n"
+                            await request.is_disconnected()
+                            or message == "data: removed\n\n"
                     ):
                         break
             except asyncio.CancelledError:
@@ -158,7 +158,7 @@ class Game:
         question_to_answers_mapping = {}
         for user in self.user_data:
             for user1 in self.user_data[user]:
-                if not self.user_data[user][user1]:
+                if user1 not in self.user_data[user] or not self.user_data[user][user1]:
                     continue
                 for answer in self.user_data[user][user1]:
                     if answer.question_name not in question_to_answers_mapping:
@@ -166,8 +166,8 @@ class Game:
                             user.name: {user1.name: answer.answer}
                         }
                     elif (
-                        user.name
-                        not in question_to_answers_mapping[answer.question_name]
+                            user.name
+                            not in question_to_answers_mapping[answer.question_name]
                     ):
                         question_to_answers_mapping[answer.question_name][user.name] = {
                             user1.name: answer.answer
