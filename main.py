@@ -35,4 +35,7 @@ if __name__ == "__main__":
     # noinspection PyTypeChecker
     config = uvicorn.Config(app=app, loop=loop)
     server = uvicorn.Server(config)
-    loop.run_until_complete(server.serve())
+    try:
+        loop.run_until_complete(server.serve())
+    except KeyboardInterrupt:
+        pass
