@@ -56,6 +56,32 @@ class PollDecodeError(Exception):
     pass
 
 
+class FrontPollField(BaseModel):
+    id: int
+    question: str
+
+
+class FrontPoll(BaseModel):
+    name: str
+    fields: list[FrontPollField]
+
+    def to_poll(self) -> Poll:
+        return Poll(
+            title=self.name,
+            description="",
+            questions={
+                fpf.question: Question(
+                    type=QuestionType.TEXTBOX,
+                    text=fpf.question,
+                    textbox=QuestionTextbox(),
+                    options=[],
+                    is_optional=False
+                )
+                for fpf in self.fields
+            }
+        )
+
+
 class Poll(BaseModel):
     title: str
     description: str

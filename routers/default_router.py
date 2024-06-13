@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.requests import Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
-from models.models import User, Poll, FilledPoll, GameData
+from models.models import *
 import core.server
 
 router = APIRouter()
@@ -103,8 +103,9 @@ def end_polling():
 
 
 @router.post("/poll/{name}/save")
-def save_poll(name: str, poll: Poll):
-    server.save_poll(poll, name)
+def save_poll(name: str, poll: FrontPoll):
+    poll2 = poll.to_poll()
+    server.save_poll(poll2, name)
 
 
 @router.get("/poll/{name}/load")
